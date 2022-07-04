@@ -1,5 +1,6 @@
 #include "pipex.h"
 #include "get_next_line.h"
+#include <stdio.h>
 #define BUFFER_SIZE 4096
 ///////////////////////
 
@@ -534,79 +535,16 @@ static char *pathfinder(char *cmd, char **envp)
         free(bin);
         path = ft_strchr(path, ':') + 1;
     }
-    return (cmd);
+    // return (cmd);
 }
-
-void do_cmd(char *cmd, char **envp)
-{
-    char **argv;
-    char *path;
-
-    argv = ft_split(cmd, ' ');
-    if (ft_strchr(argv[0], '/') == NULL)
-        path = pathfinder(argv[0], envp);
-    else
-        path = argv[0];
-    execve(path, argv, envp);
-	write(1, "cmderr", 6);
-    // exit_with_err();
-}
-
-void piping(char *cmd, char *envp[])
-{
-    pid_t pid;
-    int fd[2];
-
-    pipe(fd);
-    pid = fork();
-    if (pid == 0)
-    {
-        close(fd[0]);
-        dup2(fd[1], STDOUT_FILENO);
-        close(fd[1]);
-        do_cmd(cmd, envp);
-    }
-    else
-    {
-        close(fd[1]);
-        dup2(fd[0], STDIN_FILENO);
-        close(fd[0]);
-        waitpid(pid, NULL, 0);
-    }
-}
-
-
-
-
-
 
 int main(int argc, char *argv[], char *envp[])
 {
-    t_pipex pipex;
+    char *path;
+    char *cmd = "grep";
 
-    // if (!ft_strncmp(argv[1], "here_doc", ft_strlen("here_doc")))
-    // {
-    //     cmd_idx = 3;
-    //     infile = openfile(argv[2], HEREIN);
-    //     outfile = openfile(argv[argc - 1], HEREOUT);
-    // }
-    // else
-    // {
-    //     cmd_idx = 2;
-    //     infile = openfile(argv[1], INFILE);
-    //     outfile = openfile(argv[argc - 1], OUTFILE);
-    // }
-    ft_bzero(&pipex, sizeof(t_pipex));
-    if (!ft_strncmp(argv[1], "here_doc", ft_strlen("here_doc")))
-        here_doc(&pipex, argc, argv);
-    else
-        openfile(&pipex, argc, argv);
-    dup2(pipex.infile, STDIN_FILENO);
-    dup2(pipex.outfile, STDOUT_FILENO);
-    while (pipex.idx_cmd < pipex.last_cmd)
-    {
-        piping(argv[pipex.idx_cmd], envp);
-        pipex.idx_cmd++;
-    }
-    do_cmd(argv[pipex.last_cmd], envp);
+    path = pathfinder(cmd, envp);
+    printf("%s\n", path);
+
+    return(0);
 }
